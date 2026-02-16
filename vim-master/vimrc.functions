@@ -1,0 +1,247 @@
+" Rule: echo 'yes'
+" Rule: tmux send -t 1 'python main.py' Enter
+"
+" 5u aR  "term://~//55729:'/Users/supasorn/.fzf/bin/fzf'  '+m' '-x' '--tiebreak=index' '--header-lines=1' '--ansi' '-d' '\t' '--with-nth' '3..' '
+" -n' '2,1..2' '--prompt' 'Buf> ' '--query' '' '--preview-window' '+{2}-/2' '--tabstop' '8' '--preview-window' 'right:hidden' '--preview' ''\''/Use
+" rs/supasorn/.vim/plugged/fzf.vim/bin/preview.sh'\'' {1}' --expect=ctrl-v,ctrl-x,ctrl-t --no-height --border=rounded > /var/folders/9f/s2nq70qd4f7
+" 5mszbf60fnd4c0000gn/T/nvim.supasorn/k5wp6y/3;#FZF" line 0
+" MRU>
+function! FzfRunning()
+  let buffers = filter(range(1, bufnr('$')), 'bufname(v:val) =~# ";#FZF"')
+  for i in buffers
+    " Delete buffer by ID
+    execute "bw!" . i
+  endfor
+  sleep 10m
+endfunction
+
+
+" " Search pattern across repository files
+function! FzfExplore(...)
+    let inpath = substitute(a:1, "'", '', 'g')
+    if inpath == "" || matchend(inpath, '/') == strlen(inpath)
+      execute "cd" getcwd() . '/' . inpath
+      let cwpath = getcwd() . '/'
+      " call fzf#run(fzf#wrap(fzf#vim#with_preview({'source': 'ls -1pA && echo "../"', 'dir': cwpath, 'sink': 'FZFExplore', 'options': ['--prompt', cwpath, '--expect', 'ctrl-w']})))
+      call fzf#run(fzf#wrap(fzf#vim#with_preview({'source': 'echo "../" && ls -1pA', 'dir': cwpath, 'sink': 'FZFExplore', 'options': ['--prompt', cwpath]})))
+    else
+      let file = getcwd() . '/' . inpath
+      execute "e" file
+    endif
+endfunction
+
+command! -nargs=* FZFExplore call FzfExplore(shellescape(<q-args>))
+
+
+function! FirstLineCompile() 
+  if !empty(matchstr(getline(1), ':'))
+    let l:s = split(getline(1) , ':')
+  else
+    let l:s = ''
+  endif
+  if !empty(matchstr(l:s[0], 'Rule'))
+    let l:command = l:s[1]
+    write
+    cd %:p:h
+    let l:out = system(l:command)
+    try
+      cexpr l:out 
+    catch
+      "echo l:out
+    endtry
+    botright cwindow 8
+  else
+    execute ':SCCompileRun'
+  endif
+endfunction 
+
+function! SetRgMode(...)
+  let st = substitute(a:1, "'", '', 'g')
+  let st = substitute(st, "\\", '', 'g')
+  let g:rgmode = str2nr(st[:0]) - 1
+  echo st
+  call RgWithMode("")
+endfunction
+command! -nargs=* SetRgModeC call SetRgMode(shellescape(<q-args>))
+
+function! RgModeFZF()
+  let path = system('cd '.shellescape(expand('%:p:h')).' && git rev-parse --show-toplevel 2> /dev/null')[:-2]
+  call fzf#run({'source': [
+        \"1) Rg current buffer         [" . expand("%:p:h") . "]",
+        \"2) Rg current buffer depth 1 [" . expand("%:p:h") . "]",
+        \"3) Rg pwd                    [" . getcwd() . "]",
+        \"4) Rg git root               [" . path . "]"],
+        \'sink':'SetRgModeC', 'window': {'width': 1, 'height': 8, 'yoffset': 1}})
+endfunction
+
+function! IterateRgMode()
+  if !exists("g:rgmode")
+   let g:rgmode = 0
+ endif
+ let g:rgmode = (g:rgmode + 1) % 4
+ if g:rgmode == 0
+   echo "Rg current buffer         [" . expand("%:p:h") . "]"
+ elseif g:rgmode == 1
+   echo "Rg current buffer depth 1 [" . expand("%:p:h") . "]"
+ elseif g:rgmode == 2
+   echo "Rg pwd                    [" . getcwd() . "]"
+ else
+   let path = system('cd '.shellescape(expand('%:p:h')).' && git rev-parse --show-toplevel 2> /dev/null')[:-2]
+   echo "Rg git root               [" . path . "]"
+ endif
+endfunction
+
+function! RgWithMode(query)
+  if !exists("g:rgmode")
+   let g:rgmode = 0
+  endif
+
+  let g:rgmode_query = a:query
+  let g:rgmode_rgopt = "-g '!tags' --column --line-number --no-heading --color=always --smart-case"
+  if g:rgmode == 0
+    let g:rgmode_path = expand("%:p:h")
+  elseif g:rgmode == 1
+    let g:rgmode_path = expand("%:p:h")
+    let g:rgmode_rgopt = g:rgmode_rgopt . " --max-depth=1"
+  elseif g:rgmode == 2
+    let g:rgmode_path = getcwd()
+  else
+    let g:rgmode_path = system('cd '.shellescape(expand('%:p:h')).' && git rev-parse --show-toplevel 2> /dev/null')[:-2]
+    " call fzf#vim#grep("rg --column --line-number --no-heading --color=always --smart-case ''", 1, fzf#vim#with_preview({'dir': system('cd '.shellescape(expand('%:p:h')).' && git rev-parse --show-toplevel 2> /dev/null')[:-2]}), 0)
+  endif
+  lua require'fzf-lua'.grep({rg_opts=vim.g.rgmode_rgopt, cwd=vim.g.rgmode_path, search=vim.g.rgmode_query}) 
+  
+endfunction
+
+function! FilesAtGitRoot()
+  let path = system('cd '.shellescape(expand('%:p:h')).' && git rev-parse --show-toplevel 2> /dev/null')[:-2]
+  exec 'FzfLua files cwd=' . path
+endfunction
+
+" command! -bang -nargs=* PRg
+  " \ call fzf#vim#grep("rg -g '!tags' --column --line-number --no-heading --color=always --smart-case ".shellescape(<q-args>), 1, fzf#vim#with_preview({'dir': getcwd()}), <bang>0)
+
+function! JumpThroughParameter(direction)
+  let flag = a:direction == 1 ? '' : 'b'
+  let s1 = searchpos('\S(\S', 'en' . flag, line('.'))
+  let s2 = searchpos(', \S', 'en' . flag, line('.'))
+  if s1 != [0, 0] && (s2 == [0, 0] || 
+        \ ((flag == '' && s1[1] < s2[1]) || (flag == 'b' && s1[1] > s2[1])) )
+    call search('\S(\S', 'e' . flag, line('.'))
+  else
+    call search(', \S', 'e' . flag, line('.'))
+  endif
+endfunction
+
+function! CopyWordUnderCursor()
+  let @w = expand('<cword>')
+endfunction
+
+function! GrepCurrentDirectory(myParam)
+  execute "Rg " . a:myParam . " %:p:h/*"
+endfunction
+
+function! DelTagOfFile(file)
+  let fullpath = a:file
+  let cwd = getcwd()
+  let tagfilename = cwd . "/tags"
+  let f = substitute(fullpath, cwd . "/", "", "")
+  let f = escape(f, './')
+  let cmd = 'sed -i "/' . f . '/d" "' . tagfilename . '"'
+  let resp = system(cmd)
+endfunction
+
+function! UpdateTags()
+  let f = expand("%:p")
+  "let cwd = getcwd()
+  let cwd = expand("%:p:h")
+  let tagfilename = cwd . "/tags"
+  let cmd = 'ctags -a -f ' . tagfilename . ' --c++-kinds=+p --fields=+iaS --extra=+q ' . '"' . f . '"'
+  call DelTagOfFile(f)
+  let resp = system(cmd)
+endfunction
+
+function! SCPSourceFile() 
+  let dir = expand("%:p") 
+  let ldir = "/Users/supasorn/Research/"
+  let rdir = "/home/supasorn/research/"
+  if match(dir, ldir) == 0
+    let cmd = "scp " . expand("%:p") . " supasorn@174.21.163.107:" . substitute(expand("%:p"), ldir, rdir, "g")
+    echo cmd
+    let resp = system(cmd)
+    echo resp
+  endif
+endfunction 
+
+function! OpenRemoteOrLocal() 
+  let dir = expand("%:p:h") 
+  let ldir = "/home/supasorn/research/"
+  let rdir = "/homes/grail/supasorn/research/"
+  let scp = "scp://flatwhite.cs.washington.edu/"
+  if match(dir, ldir) == 0
+    let cmd = "e " . scp . substitute(expand("%:p"), ldir, rdir, "g")
+    execute cmd
+  elseif match(dir, "scp") == 0
+    let cmd = "e " . substitute(substitute(expand("%:p"), scp, "", "g"), rdir, ldir, "g")
+    execute cmd
+  endif
+endfunction 
+
+
+function! AfterEquationObject()
+  normal! $F=w
+  let head_pos = getpos('.')
+  normal! $
+  let tail_pos = getpos('.')
+  echom head_pos
+  return ['v', head_pos, tail_pos]
+endfunction 
+
+function! BeforeEquationObject()
+  normal! ^
+  let head_pos = getpos('.')
+  normal! f=ge
+  let tail_pos = getpos('.')
+  return ['v', head_pos, tail_pos]
+endfunction 
+
+call textobj#user#plugin('function', {
+\   'equation': {
+\     'select-i-function': 'AfterEquationObject',
+\     'select-i': '=',
+\     'select-a-function': 'BeforeEquationObject',
+\     'select-a': 'i=',
+\   },
+\ })
+" \   'function': {
+" \     'select-i-function': 'FunctionObject',
+" \     'select-i': 'iv',
+" \   },
+
+
+" onoremap n :<c-u>call <SID>NextTextObject('i')<cr>
+" function! s:NextTextObject(motion)
+  " echo 
+  " let c = nr2char(getchar())
+  " exe "normal! f".c."v".a:motion.c
+  " exe "normalv".a:motion."n".c
+" endfunction
+" test('sdfsd', 'sdfds', 'asdasd')
+"
+"
+" function! FunctionObject() " select the function's name, but doesn't quite work
+  " let s = searchpos('[^(]*(', 'enb')
+  " let e = searchpos('(', 'enb')
+  " let e = searchpos('(', 'enb')
+
+  " let buf_num = bufnr()
+  " echo a:type start_row end_row
+
+  " call setpos("'<", [buf_num, s[0], s[1], 0])
+  " call setpos("'>", [buf_num, e[0], e[1], 0])
+  " execute 'normal! `<v`>'
+" endfunction 
+" onoremap <silent>av :<C-U>call FunctionObject()<CR>
+" onoremap <silent>iv :<C-U>call FunctionObject()<CR>
+" xnoremap <silent>av :<C-U>call FunctionObject()<CR>
+" xnoremap <silent>iv :<C-U>call FunctionObject()<CR>

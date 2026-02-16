@@ -1,0 +1,102 @@
+---@diagnostic disable: missing-fields
+
+--[[
+NOTE: Set the config path to enable the copilot adapter to work.
+It will search the following paths for a token:
+  - "$CODECOMPANION_TOKEN_PATH/github-copilot/hosts.json"
+  - "$CODECOMPANION_TOKEN_PATH/github-copilot/apps.json"
+--]]
+vim.env["CODECOMPANION_TOKEN_PATH"] = vim.fn.expand("~/.config")
+
+vim.env.LAZY_STDPATH = ".repro"
+load(vim.fn.system("curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua"))()
+
+-- Your CodeCompanion setup
+local plugins = {
+  {
+    "dstein64/nvim-scrollview",
+    opts = {
+      excluded_filetypes = { 'nerdtree' },
+      current_only = true,
+      base = 'buffer',
+      column = 80,
+      signs_on_startup = { 'all' },
+      diagnostics_severities = { vim.diagnostic.severity.ERROR }
+    }
+  },
+  {
+    "olimorris/codecompanion.nvim",
+    dependencies = {
+      { "nvim-lua/plenary.nvim" },
+      {
+        "nvim-treesitter/nvim-treesitter",
+        lazy = false,
+        build = ":TSUpdate",
+      },
+
+      -- Test with blink.cmp (delete if not required)
+      {
+        "saghen/blink.cmp",
+        lazy = false,
+        version = "*",
+        opts = {
+          keymap = {
+            preset = "enter",
+            ["<S-Tab>"] = { "select_prev", "fallback" },
+            ["<Tab>"] = { "select_next", "fallback" },
+          },
+          cmdline = { sources = { "cmdline" } },
+          sources = {
+            default = { "lsp", "path", "buffer", "codecompanion" },
+          },
+        },
+      },
+
+      -- Test with nvim-cmp
+      -- { "hrsh7th/nvim-cmp" },
+    },
+    opts = {
+      --Refer to: https://github.com/olimorris/codecompanion.nvim/blob/main/lua/codecompanion/config.lua
+      interactions = {
+        --NOTE: Change the adapter as required
+        chat = { adapter = "copilot" },
+        inline = { adapter = "copilot" },
+      },
+      opts = {
+        log_level = "DEBUG",
+      },
+    },
+  },
+}
+
+-- Leaving this comment in to see if the issue author notices ;-)
+-- This is so I can tell if they've really tested with their own minimal.lua file
+
+require("lazy.minit").repro({ spec = plugins })
+
+-- CONFIGURE PLUGINS HERE -----------------------------------------------------
+
+-- Setup Tree-sitter
+require("nvim-treesitter")
+    .install({
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "yaml",
+    })
+    :wait(300000)
+
+-- Setup nvim-cmp
+-- local cmp_status, cmp = pcall(require, "cmp")
+-- if cmp_status then
+--   cmp.setup({
+--     mapping = cmp.mapping.preset.insert({
+--       ["<C-b>"] = cmp.mapping.scroll_docs(-4),
+--       ["<C-f>"] = cmp.mapping.scroll_docs(4),
+--       ["<C-Space>"] = cmp.mapping.complete(),
+--       ["<C-e>"] = cmp.mapping.abort(),
+--       ["<CR>"] = cmp.mapping.confirm({ select = true }),
+--       -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+--     }),
+--   })
+-- end
