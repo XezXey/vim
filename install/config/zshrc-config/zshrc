@@ -203,3 +203,8 @@ alias ul="tmux a -t UL"
 source ~/.vim/export_lf_icons.sh 2> /dev/null 
 
 export PATH="$HOME/.local/bin:$PATH"
+
+cluster_user="mint"
+for i in {1..24}; do
+    alias v$i="ssh ${cluster_user}@10.204.100.1$i"
+done
