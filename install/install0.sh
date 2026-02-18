@@ -6,6 +6,10 @@ curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get update
 sudo apt -y install neovim zsh tmux curl ripgrep git exuberant-ctags nodejs unzip
 chsh -s /usr/bin/zsh
+# Check if .vim is already existed then rename it to .vim_old
+if [ -d "$HOME/.vim" ]; then
+    sudo mv "$HOME/.vim" "$HOME/.vim_old"
+fi
 git clone https://github.com/XezXey/vim.git ~/.vim
 rm -rf ~/.config/nvim
 cp -r ~/.vim/install/config/nvim-config ~/.config/nvim
