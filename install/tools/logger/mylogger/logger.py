@@ -1,7 +1,7 @@
 import logging
 from colorlog import ColoredFormatter
 
-def get_logger(name="pythonConfig", level=logging.DEBUG):
+def init_logger(name="pythonConfig", level=logging.DEBUG):
     fmt = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
 
     logger = logging.getLogger(name)
