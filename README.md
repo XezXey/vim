@@ -1,5 +1,5 @@
 # vim
-
+Credit: https://github.com/supasorn/vim/tree/master
 ## Install logger
 ```
 pip install "git+https://github.com/XezXey/vim.git#subdirectory=install/tools/logger"
