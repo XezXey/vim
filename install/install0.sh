@@ -8,21 +8,26 @@ sudo add-apt-repository --remove ppa:x4121/ripgrep 2>/dev/null || true
 sudo add-apt-repository --remove ppa:neovim-ppa/stable 2>/dev/null || true
 sudo add-apt-repository --remove ppa:neovim-ppa/unstable 2>/dev/null || true
 
-# Neovim PPA: only needed on Ubuntu < 24.04 — Ubuntu 24.04+ and 26.04 (Resolute)
-# ship a recent neovim (0.11/0.12) in their official repos, so no PPA required.
-UBUNTU_VERSION=$(lsb_release -rs 2>/dev/null || echo "0")
-if awk "BEGIN {exit !($UBUNTU_VERSION < 24.04)}"; then
-  echo "==> Ubuntu < 24.04 detected — adding neovim-ppa/stable..."
+# Neovim: check what version apt actually offers before adding any PPA.
+# The config requires nvim >= 0.10 (lazy.nvim, treesitter main branch, etc.)
+NVIM_MIN="0.10"
+sudo apt-get update -qq
+NVIM_APT=$(apt-cache policy neovim 2>/dev/null \
+  | awk '/Candidate:/{print $2}' \
+  | grep -oP '\d+\.\d+' | head -1 || echo "0.0")
+echo "==> neovim available in apt: ${NVIM_APT:-none}  (minimum required: $NVIM_MIN)"
+if awk "BEGIN {exit !(${NVIM_APT:-0} < $NVIM_MIN)}"; then
+  echo "==> apt neovim is too old — adding ppa:neovim-ppa/stable..."
   sudo add-apt-repository -y ppa:neovim-ppa/stable
+  sudo apt-get update -qq
 else
-  echo "==> Ubuntu $UBUNTU_VERSION — neovim available from official repos, skipping PPA."
+  echo "==> apt neovim $NVIM_APT is sufficient, skipping PPA."
 fi
 
 # Node.js: use setup_lts.x (always points to the latest Active LTS, currently Node 22)
 echo "==> Installing Node.js LTS via NodeSource..."
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
-sudo apt-get update
 sudo apt-get install -y neovim zsh tmux curl ripgrep git exuberant-ctags nodejs unzip build-essential
 
 echo "==> Changing default shell to zsh..."
