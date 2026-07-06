@@ -1684,20 +1684,35 @@ return {
     build = ':TSUpdate',
     config = function()
       local ts = require("nvim-treesitter")
-      ts.install({ 
-        "c", "python", "css", "cpp", "go", "html", "java", "javascript", 
-        "json", "lua", "make", "php", "vim", "typescript", "vimdoc", 
-        "markdown", "markdown_inline", "yaml", "query" 
-      })
-      vim.api.nvim_create_autocmd('FileType', {
-        callback = function(args)
-          -- Check if a parser exists for the current filetype
-          local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
-          if lang then
-            pcall(vim.treesitter.start, args.buf, lang)
-          end
-        end,
-      })
+      -- php_only is required for PHP injection into template languages (blade/twig)
+      -- Install only parsers not already present to avoid re-downloading every startup
+      local desired = {
+        "c", "python", "css", "cpp", "go", "html", "java", "javascript",
+        "json", "lua", "make", "php", "php_only", "vim", "typescript", "vimdoc",
+        "markdown", "markdown_inline", "yaml", "query"
+      }
+      local installed = {}
+      pcall(function()
+        installed = require("nvim-treesitter.config").installed_parsers()
+      end)
+      local to_install = vim.tbl_filter(function(p)
+        return not vim.tbl_contains(installed, p)
+      end, desired)
+      if #to_install > 0 then
+        ts.install(to_install)
+      end
+      -- Defer FileType autocmd so render-markdown and other plugins are fully loaded
+      -- before we try to start treesitter (avoids the FileType Autocommands error)
+      vim.schedule(function()
+        vim.api.nvim_create_autocmd('FileType', {
+          callback = function(args)
+            local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+            if lang then
+              pcall(vim.treesitter.start, args.buf, lang)
+            end
+          end,
+        })
+      end)
     end,
   },
   { "nvim-treesitter/nvim-treesitter-textobjects", -- treesitter textobjects
