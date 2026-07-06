@@ -1684,12 +1684,12 @@ return {
     build = ':TSUpdate',
     config = function()
       local ts = require("nvim-treesitter")
-      -- php_only is required for PHP injection into template languages (blade/twig)
-      -- Install only parsers not already present to avoid re-downloading every startup
+      -- nvim 0.10+ bundles these parsers natively — no need to reinstall them:
+      --   c, lua, vim, vimdoc, query, markdown, markdown_inline
+      -- Only install parsers NOT already bundled with neovim.
       local desired = {
-        "c", "python", "css", "cpp", "go", "html", "java", "javascript",
-        "json", "lua", "make", "php", "php_only", "vim", "typescript", "vimdoc",
-        "markdown", "markdown_inline", "yaml", "query"
+        "python", "css", "cpp", "go", "html", "java", "javascript",
+        "json", "make", "php", "php_only", "typescript", "yaml",
       }
       local installed = {}
       pcall(function()

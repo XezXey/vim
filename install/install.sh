@@ -8,9 +8,11 @@ mkdir -p ~/.config/lf
 ln -sf ~/.vim/install/lfrc ~/.config/lf/lfrc
 ln -sf ~/.vim/install/lfcd.sh ~/.config/lf/lfcd.sh
 
-# Install/update global LSP packages (pyright + CSS/HTML/JSON/ESLint language servers)
-echo "==> Installing global npm packages for LSP..."
-sudo npm install -g pyright vscode-langservers-extracted@latest
+# Install/update global npm packages:
+# - pyright, vscode-langservers-extracted: LSP servers for Python, CSS, HTML, JSON, ESLint
+# - tree-sitter-cli: required by nvim-treesitter (main branch) to compile parsers
+echo "==> Installing global npm packages for LSP + tree-sitter..."
+sudo npm install -g pyright vscode-langservers-extracted@latest tree-sitter-cli
 
 # Bootstrap lazy.nvim and install all plugins headlessly
 echo "==> Bootstrapping neovim plugins (this may take a while)..."
