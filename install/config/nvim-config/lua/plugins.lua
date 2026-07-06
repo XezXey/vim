@@ -1540,7 +1540,28 @@ return {
     },
   },
   -- ### LSP, Treesitter, Tags
-  { "jose-elias-alvarez/null-ls.nvim", -- For adding format() to lsp, etc
+  -- { "jose-elias-alvarez/null-ls.nvim", -- For adding format() to lsp, etc
+  --   keys = {
+  --     { "<leader>f", vim.lsp.buf.format, mode = { "n", "v" }, desc="format code" }
+  --   },
+  --   config = function()
+  --     -- local map = require("utils").map
+  --     -- map(, "<leader>f", vim.lsp.buf.format)
+  --     require("null-ls").setup({
+  --       sources = {
+  --         -- require("null-ls").builtins.formatting.stylua,
+  --         require("null-ls").builtins.formatting.autopep8.with({
+  --           extra_args = {
+  --             "--indent-size", "2"
+  --           }
+  --         }),
+  --       },
+  --     })
+  --   end
+  -- },
+  { 
+    "nvimtools/none-ls.nvim", -- Switched to the maintained community fork
+    dependencies = { "nvim-lua/plenary.nvim" }, -- Recommended dependency for none-ls
     keys = {
       { "<leader>f", vim.lsp.buf.format, mode = { "n", "v" }, desc="format code" }
     },
