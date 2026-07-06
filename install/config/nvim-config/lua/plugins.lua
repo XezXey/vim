@@ -1684,12 +1684,13 @@ return {
     build = ':TSUpdate',
     config = function()
       local ts = require("nvim-treesitter")
-      -- nvim 0.10+ bundles these parsers natively — no need to reinstall them:
-      --   c, lua, vim, vimdoc, query, markdown, markdown_inline
-      -- Only install parsers NOT already bundled with neovim.
+      -- nvim 0.10+ bundles: c, lua, vim, vimdoc, query
+      -- markdown/markdown_inline must still be listed here — render-markdown.nvim
+      -- needs the parser explicitly loaded even though nvim bundles it.
       local desired = {
         "python", "css", "cpp", "go", "html", "java", "javascript",
         "json", "make", "php", "php_only", "typescript", "yaml",
+        "markdown", "markdown_inline",
       }
       local installed = {}
       pcall(function()
@@ -1828,6 +1829,14 @@ return {
   -- ### Debugger (DAP) & Compiler
   { 'igorlfs/nvim-dap-view', -- UI for nvim-dap
     lazy = true,
+    config = function()
+      -- Wrap in pcall: nvim-dap-view uses `update` key in nvim_set_hl which
+      -- may not be valid in all nvim 0.12 builds — skip silently if so.
+      local ok, err = pcall(require, "dap-view")
+      if not ok then
+        vim.notify("nvim-dap-view: " .. tostring(err), vim.log.levels.WARN)
+      end
+    end,
     opts = {
       winbar = {
         controls = {

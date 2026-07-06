@@ -28,7 +28,7 @@ fi
 echo "==> Installing Node.js LTS via NodeSource..."
 curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 
-sudo apt-get install -y neovim zsh tmux curl ripgrep git exuberant-ctags nodejs unzip build-essential
+sudo apt-get install -y neovim zsh tmux curl ripgrep fzf git exuberant-ctags nodejs unzip build-essential
 
 echo "==> Changing default shell to zsh..."
 chsh -s /usr/bin/zsh

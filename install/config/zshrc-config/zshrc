@@ -131,7 +131,11 @@ alias dpython="python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 --wa
 export IST_NAS_USER="puntawatp"
 alias sgrt="python /ist-nas/users/$IST_NAS_USER/sing3/run.py"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# fzf shell integration (key bindings + completion)
+# Works with fzf installed via apt, brew, or binary \u2014 no install script needed
+if command -v fzf &>/dev/null; then
+  eval "$(fzf --zsh)"
+fi
 
 alias spaces="du -hsx * | sort -h"
 alias space="du -hx * | sort -h"
