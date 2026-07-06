@@ -5,8 +5,18 @@ set -e  # exit on error
 echo "==> Updating apt and adding repos..."
 # Remove old/deprecated PPAs
 sudo add-apt-repository --remove ppa:x4121/ripgrep 2>/dev/null || true
-# Use stable neovim PPA (more reliable than unstable)
-sudo add-apt-repository -y ppa:neovim-ppa/stable
+sudo add-apt-repository --remove ppa:neovim-ppa/stable 2>/dev/null || true
+sudo add-apt-repository --remove ppa:neovim-ppa/unstable 2>/dev/null || true
+
+# Neovim PPA: only needed on Ubuntu < 24.04 — Ubuntu 24.04+ and 26.04 (Resolute)
+# ship a recent neovim (0.11/0.12) in their official repos, so no PPA required.
+UBUNTU_VERSION=$(lsb_release -rs 2>/dev/null || echo "0")
+if awk "BEGIN {exit !($UBUNTU_VERSION < 24.04)}"; then
+  echo "==> Ubuntu < 24.04 detected — adding neovim-ppa/stable..."
+  sudo add-apt-repository -y ppa:neovim-ppa/stable
+else
+  echo "==> Ubuntu $UBUNTU_VERSION — neovim available from official repos, skipping PPA."
+fi
 
 # Node.js: use setup_lts.x (always points to the latest Active LTS, currently Node 22)
 echo "==> Installing Node.js LTS via NodeSource..."
