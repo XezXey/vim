@@ -33,12 +33,18 @@ sudo apt-get install -y neovim zsh tmux curl ripgrep git exuberant-ctags nodejs 
 echo "==> Changing default shell to zsh..."
 chsh -s /usr/bin/zsh
 
-# Clone the vim config (back up if existing)
-if [ -d "$HOME/.vim" ]; then
-    echo "==> Backing up existing ~/.vim to ~/.vim_old..."
-    mv "$HOME/.vim" "$HOME/.vim_old"
+# Clone or update the vim config repo
+REPO_URL="https://github.com/XezXey/vim.git"
+if [ -d "$HOME/.vim/.git" ] && git -C "$HOME/.vim" remote get-url origin 2>/dev/null | grep -q "XezXey/vim"; then
+  echo "==> ~/.vim already cloned \u2014 pulling latest changes..."
+  git -C "$HOME/.vim" pull --ff-only
+elif [ -d "$HOME/.vim" ]; then
+  echo "==> ~/.vim exists but is not the vim repo \u2014 backing up to ~/.vim_old..."
+  mv "$HOME/.vim" "$HOME/.vim_old"
+  git clone "$REPO_URL" ~/.vim
+else
+  git clone "$REPO_URL" ~/.vim
 fi
-git clone https://github.com/XezXey/vim.git ~/.vim
 
 echo "==> Copying neovim config..."
 rm -rf ~/.config/nvim
