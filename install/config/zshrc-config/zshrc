@@ -127,8 +127,10 @@ alias vim="nvim"
 alias vi="nvim"
 alias v="nvim"
 alias dpython="python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 --wait-for-client"
+alias rs="rsync --progress -auz"
 
 export IST_NAS_USER="puntawatp"
+export IST_USER="puntawatp"
 alias sgrt="python /ist-nas/users/$IST_NAS_USER/sing3/run.py"
 
 # fzf shell integration (key bindings + completion)
