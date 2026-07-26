@@ -85,7 +85,7 @@ source $ZSH/oh-my-zsh.sh
 # else
 #   export EDITOR='mvim'
 # fi
-
+export EDITOR='nvim'
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
@@ -126,6 +126,9 @@ export TERM="xterm-256color"
 alias vim="nvim"
 alias vi="nvim"
 alias v="nvim"
+alias gpu="watch -n 1 nvidia-smi"
+alias cact="conda activate"
+alias cdact="conda deactivate"
 alias dpython="python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 --wait-for-client"
 alias rs="rsync --progress -auz"
 
