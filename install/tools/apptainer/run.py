@@ -43,10 +43,8 @@ def main():
     parser.add_argument('--here',      action='store_true', help='Map current host cwd to container cwd under /host')
     parser.add_argument('--cmd',       metavar='CMD',      help='Command string to run inside singularity')
     parser.add_argument('--base',      default=None, help='Base path for projects and conda environments')
-    # parser.add_argument('--tmp',       default=f"/home/{user}/tmp", help='/tmp location')
     parser.add_argument('--tmp',       default=None, help='/tmp location')
     parser.add_argument('--sand',      action='store_true', help='use sand/')
-    parser.add_argument('--sif',       default=None, help='use custom sif file')
     parser.add_argument('--cuda',      action='store_true', help='bind cuda toolkit')
     parser.add_argument('--ssh',       action='store_true', default=False, help='bind .ssh folder inside Singularity')
     # Mint's
@@ -137,7 +135,8 @@ def main():
     if args.cmd is not None:
         sing_command += [args.cmd, "; "]
 
-    final = [*command, *opts, f'{script_dir}/sand{"" if args.sand else ".sif"}', '/usr/bin/zsh', '-is', 'eval', "".join(sing_command)]
+    sand_path = f'{script_dir}/sand{"" if args.sand else ".sif"}'
+    final = [*command, *opts, sand_path, '/usr/bin/zsh', '-is', 'eval', "".join(sing_command)]
 
     echo_singularity_cmd(final)
     subprocess.run(final)

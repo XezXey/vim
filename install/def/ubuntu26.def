@@ -37,12 +37,23 @@ From: ubuntu:26.04
         libxrender1 \
         libxi6 \
         libgl1 \
-        libglib2.0-0 \
+        libglib2.0-0t64 \
         libssl-dev \
         libffi-dev \
         fzf \
         exuberant-ctags \
         software-properties-common \
+        libegl1-mesa-dev \
+        libgl1-mesa-dev \
+        libglu1-mesa \
+        libegl-dev \
+        libgl-dev \
+        mesa-common-dev \
+        xvfb \
+        procps \
+        libgbm-dev \
+        libxt6 \
+        python3-dev \
         && rm -rf /var/lib/apt/lists/*
 
     echo "==> Installing Node.js LTS via NodeSource"
@@ -72,10 +83,11 @@ From: ubuntu:26.04
         UV_INSTALL_DIR=/usr/local/bin sh
 
     echo "==> Installing Dust"
+    mkdir -p /opt/build-tmp
     wget https://github.com/bootandy/dust/releases/download/v1.2.4/du-dust_1.2.4-1_amd64.deb \
-        -O /tmp/du-dust_1.2.4-1_amd64.deb 
-    apt install -y /tmp/du-dust_1.2.4-1_amd64.deb 
-    rm /tmp/du-dust_1.2.4-1_amd64.deb
+        -O /opt/build-tmp/du-dust_1.2.4-1_amd64.deb
+    apt install -y /opt/build-tmp/du-dust_1.2.4-1_amd64.deb
+    rm -rf /opt/build-tmp
 
     echo "==> Symlinking fdfind to fd"
     ln -s /usr/bin/fdfind /usr/local/bin/fd
