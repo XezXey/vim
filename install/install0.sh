@@ -50,6 +50,10 @@ echo "==> Copying neovim config..."
 rm -rf ~/.config/nvim
 cp -r ~/.vim/install/config/nvim-config ~/.config/nvim
 
+echo "==> Copying dotfiles's script..."
+cp -r ~/.vim/install/dotfiles/ ~/dotfiles
+
+
 echo "==> Installing oh-my-zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 

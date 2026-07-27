@@ -19,7 +19,7 @@ source $ZSH/oh-my-zsh.sh
 # ==============================================================================
 export EDITOR='nvim'
 export TERM="xterm-256color"
-export LD_LIBRARY_PATH="/usr/local/lib/"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib/"
 export CUDA_DEVICE_ORDER=PCI_BUS_ID
 export IST_USER="puntawatp"
 
@@ -168,6 +168,9 @@ alias ul="tmux a -t UL"
 
 # Cluster Utilities & SSH Shortcuts
 alias run="python3 ~/cluster_utils/tasklauncher_uni.py"
+
+# Updating zshrc and tmux.conf from the repo
+alias fetch_zshrc="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/zshrc-config-sif/zshrc -o .zshrc && source .zshrc"
 
 cluster_user="mint"
 for i in {1..24}; do

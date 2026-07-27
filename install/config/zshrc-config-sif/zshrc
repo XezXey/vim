@@ -169,6 +169,10 @@ alias ul="tmux a -t UL"
 # Cluster Utilities & SSH Shortcuts
 alias run="python3 ~/cluster_utils/tasklauncher_uni.py"
 
+# Updating zshrc and tmux.conf from the repo
+alias fetch_zshrc="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/zshrc-config-sif/zshrc -o ./dotfiles/.zshrc && source .zshrc"
+alias fetch_tmux_conf="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/tmux-config/tmux.conf -o ./dotfiles/.tmux.conf && tmux source-file .tmux.conf"
+
 cluster_user="mint"
 for i in {1..24}; do
     ip_suffix=$(printf "%02d" $i)
