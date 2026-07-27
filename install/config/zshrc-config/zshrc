@@ -171,7 +171,8 @@ alias ul="tmux a -t UL"
 alias run="python3 ~/cluster_utils/tasklauncher_uni.py"
 
 # Updating zshrc and tmux.conf from the repo
-alias fetch_zshrc="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/zshrc-config/zshrc -o .zshrc && source .zshrc"
+# alias fetch_zshrc="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/zshrc-config/zshrc -o .zshrc && source .zshrc"
+alias fetch_zshrc='curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/zshrc-config/zshrc -o /tmp/.zshrc_new && diff -u --color=always ~/.zshrc /tmp/.zshrc_new | less -R && read -q "REPLY?Apply changes and source? (y/n): " && echo "" && mv /tmp/.zshrc_new ~/.zshrc && source ~/.zshrc'
 alias fetch_tmux_conf="curl -fsSL https://raw.githubusercontent.com/XezXey/vim/master/install/config/tmux-config/tmux.conf -o .tmux.conf && tmux source-file .tmux.conf"
 
 cluster_user="mint"
