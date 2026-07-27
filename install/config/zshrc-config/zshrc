@@ -60,7 +60,7 @@ fi
 ## source ~/dotfiles/scripts/blinks_singularity.zsh-theme
 
 # Apptainer / Singularity execution shortcut
-alias sgrt="python /ist-nas/users/$IST_USER/sing3/run.py"
+alias sgrt="python /ist-flash/users/$IST_USER/sing/run.py"
 
 # ==============================================================================
 # TOOLS & INTEGRATIONS (fzf, lf, bat)
