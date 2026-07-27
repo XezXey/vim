@@ -57,7 +57,7 @@ if [[ -z $SINGULARITY_NAME ]]; then
 fi
 
 # Singularity prompt theme
-# source ~/dotfiles/scripts/blinks_singularity.zsh-theme
+## source ~/dotfiles/scripts/blinks_singularity.zsh-theme
 
 # Apptainer / Singularity execution shortcut
 alias sgrt="python /ist-nas/users/$IST_USER/sing3/run.py"
