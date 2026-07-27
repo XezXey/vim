@@ -1,4 +1,20 @@
 #!/usr/bin/env python3
+# Command: 
+"""
+apptainer exec \                                                                                                !2452
+    --containall \
+    --home /home/$USER \
+    --bind /ist-flash/users/$IST_USER/sing/home:/home/$USER \
+    --bind /ist:/ist \
+    --bind /ist-nas:/ist-nas \
+    --bind /ist-flash:/ist-flash \
+    --env HF_HUB_CACHE=/ist-flash/ist-share/vision/huggingface_hub \
+    --env CONDA_PKGS_DIRS=/ist-flash/ist-share/vision/conda_pkgs \
+    --env UV_CACHE_DIR=/ist-flash/ist-share/vision/uv_cache \
+    --env CONDA_ENVS_DIRS=/ist-flash/users/$IST_USER/conda_envs \
+    --nv \
+    /ist-flash/users/$IST_USER/sing/ubuntu26.sif /usr/bin/zsh -is eval
+"""
 
 # script version 2.0
 import os
@@ -30,6 +46,7 @@ def main():
     # parser.add_argument('--tmp',       default=f"/home/{user}/tmp", help='/tmp location')
     parser.add_argument('--tmp',       default=None, help='/tmp location')
     parser.add_argument('--sand',      action='store_true', help='use sand/')
+    parser.add_argument('--sif',       default=None, help='use custom sif file')
     parser.add_argument('--cuda',      action='store_true', help='bind cuda toolkit')
     parser.add_argument('--ssh',       action='store_true', default=False, help='bind .ssh folder inside Singularity')
     # Mint's
@@ -53,12 +70,16 @@ def main():
     opts = [
         '--containall',
         '--home', f'/home/{user}',
+        # bind /ist, /ist-nas, /ist-flash
+        '--bind', f'/ist:/ist',
+        '--bind', f'/ist-nas:/ist-nas',
+        '--bind', f'/ist-flash:/ist-flash',
+        # bind HF_HUB_CACHE, CONDA_PKGS_DIRS, UV_CACHE_DIR
         '--env',  f'HF_HUB_CACHE=/host{top_level}/ist-share/vision/huggingface_hub',
+        '--env',  f'CONDA_PKGS_DIRS=/host{top_level}/ist-share/vision/conda_pkgs',
+        '--env',  f'UV_CACHE_DIR=/host{top_level}/ist-share/vision/uv_cache',
         '--env',  f'SSH_CONNECTION={os.environ.get("SSH_CONNECTION", "")}',
-        # '--env',  f'SSH_AUTH_SOCK=/home/{user}/ssh-agent.sock',
         '--bind', f'{script_dir}/home:/home/{user}',
-        # '--bind', f'{ssh_auth_sock}:/home/{user}/ssh-agent.sock',
-        # '--bind', '/usr/lib/x86_64-linux-gnu/libEGL.so.1:/usr/lib/x86_64-linux-gnu/libEGL.so.1',
     ]
     if args.tmp is None:
         opts += ['--bind', f'/tmp:/tmp']
@@ -69,7 +90,7 @@ def main():
         os.chmod(args.tmp, 0o700)
         opts += ['--bind', f'{args.tmp}:/tmp']
 
-    command = ['singularity', 'exec']
+    command = ['apptainer', 'exec']
     # build prefix
     if args.root:
         opts += ["--writable"]

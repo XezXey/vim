@@ -1,0 +1,176 @@
+# ==============================================================================
+# OH-MY-ZSH & CORE CONFIGURATION
+# ==============================================================================
+omz="~/.oh-my-zsh"
+export ZSH="${omz/#\~/$HOME}"
+
+ZSH_THEME="blinks"
+
+plugins=(
+  git
+  z
+  extract
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# ==============================================================================
+# ENVIRONMENT VARIABLES & PATHS
+# ==============================================================================
+export EDITOR='nvim'
+export TERM="xterm-256color"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib/"
+export CUDA_DEVICE_ORDER=PCI_BUS_ID
+export IST_USER="puntawatp"
+
+# Custom binary paths
+export PATH="$HOME/.local/bin:$HOME/.fzf/bin:$PATH"
+
+# Environment & Shell State
+UNAME=$(uname | tr "[:upper:]" "[:lower:]")
+hn="$(hostname)"
+unset TMUX  # Allow nested tmux
+
+# ==============================================================================
+# HISTORY CONFIGURATION
+# ==============================================================================
+HISTFILE=~/.zsh_history
+HISTSIZE=999999999
+SAVEHIST=$HISTSIZE
+
+# Appends every command to the history file once it is executed
+setopt inc_append_history
+
+# ==============================================================================
+# APPTAINER / SINGULARITY CONFIGURATION
+# ==============================================================================
+# NVM Loader (deferred inside Singularity to improve startup performance)
+load_nvm() {
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+}
+
+# Load NVM only when not running inside Singularity/Apptainer
+if [[ -z $SINGULARITY_NAME ]]; then
+  load_nvm
+fi
+
+# Singularity prompt theme
+source ~/dotfiles/scripts/blinks_singularity.zsh-theme
+
+# Apptainer / Singularity execution shortcut
+alias sgrt="python /ist-nas/users/$IST_USER/sing3/run.py"
+
+# ==============================================================================
+# TOOLS & INTEGRATIONS (fzf, lf, bat)
+# ==============================================================================
+# Bat (cat alternative) theme
+export BAT_THEME="gruvbox-dark"
+
+# LF File Manager Integration
+source ~/dotfiles/scripts/export_lf_icons.sh 2> /dev/null
+source ~/.vim/export_lf_icons.sh 2> /dev/null
+
+LFCD="$HOME/.config/lf/lfcd.sh"
+if [ -f "$LFCD" ]; then
+    source "$LFCD"
+fi
+bindkey -s '^o' 'lfcd\n'
+
+# FZF Environment & Options
+export FZF_MARKS_JUMP=^h
+export FZFZ_SUBDIR_LIMIT=0
+export FZFZ_EXTRA_OPTS="--reverse"
+export FZF_CTRL_R_OPTS="--reverse --preview 'echo {} |sed -e \"s/^ *\([0-9]*\) *//\" -e \"s/.\\{\$COLUMNS\\}/&\\n/g\"' --preview-window down:3:hidden --bind ?:toggle-preview"
+
+# FZF Shell Integration
+if command -v fzf &>/dev/null; then
+  eval "$(fzf --zsh)"
+fi
+
+# FZF Custom Path Completion
+FZFPATHCOMPLETE="$HOME/dotfiles/scripts/fzf_path_complete.sh"
+if [ -f "$FZFPATHCOMPLETE" ]; then
+    source "$FZFPATHCOMPLETE"
+fi
+zle -N fzf_path_complete
+bindkey '^P' fzf_path_complete
+
+# ==============================================================================
+# ZSH PLUGINS & KEYBINDINGS
+# ==============================================================================
+# Helper to auto-clone and source git plugins
+source-git() {
+  target=~/.zsh/$1:t:r
+  plugin=$target/$1:t:r.plugin.zsh
+  if [ ! -d "$target" ] ; then
+    git clone $1 $target
+  fi
+  if [ ! -f "$plugin" ]; then
+    plugin=$target/$1:t:r
+  fi
+  source $plugin
+}
+
+source-git https://github.com/XezXey/fzf-z.git                 # ctrl-g function
+source-git https://github.com/changyuheng/zsh-interactive-cd.git
+source-git https://github.com/zsh-users/zsh-autosuggestions.git
+source-git https://github.com/hchbaw/zce.zsh.git                 # easy motion
+source-git https://github.com/urbainvaes/fzf-marks
+
+# Keybindings & Plugin styling
+bindkey '^[[Z' autosuggest-accept
+bindkey '^f' zce
+
+zstyle ':zce:*' bg 'fg=3'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=23'
+
+# ==============================================================================
+# CUSTOM FUNCTIONS
+# ==============================================================================
+fshere() {
+  cmd="sshfs -o cache=no -o IdentityFile=/home/$USER/.ssh/id_rsa $USER@$@ $PWD"
+  echo $cmd
+  eval $cmd
+  cd ..
+  cd -
+}
+
+# ==============================================================================
+# ALIASES
+# ==============================================================================
+# Neovim / Editor
+alias vim="nvim"
+alias vi="nvim"
+alias v="nvim"
+
+# System & GPU Monitoring
+alias gpu="watch -n 1 nvidia-smi"
+alias lsgpu='python3 ~/dotfiles/scripts/lsgpu.py'
+alias spaces="du -hsx * | sort -h"
+alias space="du -hx * | sort -h"
+
+# Conda & Python Debugging
+alias cact="conda activate"
+alias cdact="conda deactivate"
+alias dpython="python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 --wait-for-client"
+
+# File Search & Sync
+alias rs="rsync --progress -auz"
+alias rg1="rg --max-depth=1"
+alias rgf='rg --files | rg'
+
+# Tmux
+alias tm="tmux"
+alias tma="tmux a"
+alias ul="tmux a -t UL"
+
+# Cluster Utilities & SSH Shortcuts
+alias run="python3 ~/cluster_utils/tasklauncher_uni.py"
+
+cluster_user="mint"
+for i in {1..24}; do
+    ip_suffix=$(printf "%02d" $i)
+    alias v$i="ssh ${cluster_user}@10.204.100.1${ip_suffix}"
+done
