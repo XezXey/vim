@@ -51,7 +51,7 @@ rm -rf ~/.config/nvim
 cp -r ~/.vim/install/config/nvim-config ~/.config/nvim
 
 echo "==> Copying dotfiles's script..."
-cp -r ~/.vim/install/dotfiles/ ~/dotfiles
+cp -r ~/.vim/install/config/dotfiles/ ~/dotfiles
 
 
 echo "==> Installing oh-my-zsh..."
